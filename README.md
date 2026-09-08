@@ -18,7 +18,7 @@ unverifiable AIS claims) can be detected and quantified from open data.
 - **[KSE Institute](https://sanctions.kse.ua/)** — publicly reported list of sanctioned/unsanctioned shadow fleet tankers
 
 ## Project structure
-\`\`\`
+```
 shadow-fleet-analysis/
 ├── data/
 │   ├── shadow_fleet_vessels.csv      # Initial vessel list (IMO, name, owner info from KSE reports)
@@ -29,7 +29,7 @@ shadow-fleet-analysis/
 │   ├── 02_flag_analysis.ipynb        # Flag-change frequency analysis, timeline construction
 │   └── utils.py                      # API request + JSON parsing functions
 └── README.md
-\`\`\`
+```
 
 ## Key findings so far
 - **Name mismatches**: the "currently verified" vessel name (per GFW registry) 
