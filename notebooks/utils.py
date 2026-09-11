@@ -24,7 +24,11 @@ def parse_vessel_data(imo, raw_data):
 
     all_identities = []
     for entry in raw_data['entries']:
-        source_records = entry['registryInfo'] if entry['registryInfo'] else entry['selfReportedInfo']
+        source_records = (
+            entry['registryInfo']
+            if entry['registryInfo']
+            else entry['selfReportedInfo']
+        )
         for record in source_records:
             all_identities.append({
                 "imo": imo,
