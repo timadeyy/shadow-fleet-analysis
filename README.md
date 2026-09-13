@@ -27,6 +27,7 @@ shadow-fleet-analysis/
 ├── notebooks/
 │   ├── 01_data_collection.ipynb      # Pulls vessel identity data from GFW API, caches to CSV
 │   ├── 02_flag_analysis.ipynb        # Flag-change frequency analysis, timeline construction
+│   ├── 03_visualization.ipynb        # Visualization of changes 
 │   └── utils.py                      # API request + JSON parsing functions
 └── README.md
 ```
