@@ -43,8 +43,11 @@ shadow-fleet-analysis/
   stable identity periods (5+ years under one flag) followed by rapid flag-hopping 
   (multiple changes within a single year) — investigating whether this clustering 
   aligns with sanctions timeline events.
+- **Tagor** is the most interesting vessel in the dataset. In **2012**, its AIS history
+shows an incident: for 8 days, a transmitter broadcast its IMO number under the name
+*"FRENCH NAVY WARSHIP"*. In **2026**, the tanker was **captured by the French Navy**
+in the Atlantic.
 
 ## Next steps
-- [ ] Quantify flag-change frequency before/after key sanctions dates across the full 50-vessel sample
 - [ ] Pull port-visit and vessel-encounter event data from GFW to add a behavioral layer
 - [ ] Build summary visualizations (timeline chart, flag-change distribution)}
