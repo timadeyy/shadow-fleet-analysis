@@ -21,13 +21,20 @@ unverifiable AIS claims) can be detected and quantified from open data.
 ```
 shadow-fleet-analysis/
 ├── data/
-│   ├── shadow_fleet_vessels.csv      # Initial vessel list (IMO, name, owner info from KSE reports)
-│   ├── vessel_summary.csv            # One row per vessel: current verified identity + suspicious match count
-│   └── vessel_identities.csv         # Full identity history: every flag/name ever linked to each IMO
+│   ├── shadow_fleet_vessels.csv      # Initial vessel list: IMO, name, size, owner and manager (KSE reports)
+│   ├── identities.csv                # Full identity history from GFW: every flag/name ever linked to each IMO
+│   ├── vessel_identities.csv         # Same as identities.csv, without the days_since_last_update column
+│   ├── vessel_summary.csv            # One row per vessel: current verified identity + identity/flag counts
+│   ├── flag_change_intervals.csv     # Flag before/after each change, with IMO
+│   └── flag_df.csv                   # Flag before/after pairs, aggregated across the fleet
 ├── notebooks/
-│   ├── 01_data_collection.ipynb      # Pulls vessel identity data from GFW API, caches to CSV
+│   ├── 01_data_collection.ipynb      # Pulls vessel identity data from the GFW API, caches to CSV
 │   ├── 02_flag_analysis.ipynb        # Flag-change frequency analysis, timeline construction
+│   ├── 03_visualization.ipynb        # Flag changes before and after 2023
+│   ├── 04_management_countries.ipynb # Registered owner vs ISM manager country, world map
 │   └── utils.py                      # API request + JSON parsing functions
+├── reports/
+│   └── ism_map.png                   # World map: vessels managed per country (ISM manager)
 └── README.md
 ```
 
