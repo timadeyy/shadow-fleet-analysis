@@ -16,6 +16,7 @@ unverifiable AIS claims) can be detected and quantified from open data.
 ## Data sources
 - **[Global Fishing Watch API](https://globalfishingwatch.org/our-apis/)** — vessel identity history (flags, names, registry vs. self-reported data)
 - **[KSE Institute](https://sanctions.kse.ua/)** — publicly reported list of sanctioned/unsanctioned shadow fleet tankers
+- **[OpenSanctions – Ukraine War and Sanctions](https://www.opensanctions.org/datasets/ua_war_sanctions/)** — vessel specifications (deadweight, gross tonnage, build year), based on data from the Defence Intelligence of Ukraine (GUR); licensed under CC BY-NC 4.0, accessed 2026-09-25
 
 ## Project structure
 ```
