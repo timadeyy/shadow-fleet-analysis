@@ -48,7 +48,6 @@ shadow-fleet-analysis/
 1. Create a `.env` file in the project root with `GFW_API_TOKEN=your_token`
 2. Install dependencies into a virtual environment
 3. Run the notebooks in order: `01 → 02 → 03 → 04 → 05`
-   (`01` creates `data/shadow_FV.csv`, which is used by later notebooks)
 
 ## Key findings so far
 - **Name mismatches**: the "currently verified" vessel name (per GFW registry)
