@@ -103,3 +103,53 @@ def parse_vessel_data(imo, raw_data):
   }
 
   return summary, all_identities
+
+
+def get_vessels_ids(imo):
+    raw = get_vessel_info(imo)
+    if not raw:
+        return []
+    ids = []
+    for entry in raw['entries']:
+        for rec in entry['selfReportedInfo']:
+            ids.append(rec['id'])
+    return ids
+
+
+def get_port_visitors(ids, start = '2025-01-01', end='2025-12-31'):
+    url = 'https://gateway.api.globalfishingwatch.org/v3/events'
+    params = {
+        'datasets[0]': 'public-global-port-visits-events:latest',
+        'start-date': start,
+        'end-date': end,
+        'limit': 100,
+        'offset': 0,
+    }
+    for i, vid in enumerate(ids):
+        params[f'vessels[{i}]'] = vid
+    entries = []
+    while True:
+        r = requests.get(url,headers=headers, params=params)
+        if r.status_code != 200:
+            print("error", r.status_code,r.text[:200])
+            break
+        data = r.json()
+        entries.extend(data['entries'])
+        if data ['nextOffset'] is None:
+            break
+        params['offset'] = data['nextOffset']
+    return entries
+
+
+def parse_port_visits(imo,entries):
+    rows = []
+    for e in entries:
+        anch = e['port_visit']['intermediateAnchorage']
+        rows.append({
+            'imo': imo,
+            'start': e['start'],
+            'port': anch['topDestination'],
+            'country': anch['flag'],
+            'hours':e['port_visit']['durationHrs'],
+        })
+    return rows
