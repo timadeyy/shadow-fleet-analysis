@@ -31,13 +31,14 @@ shadow-fleet-analysis/
 │   ├── vessel_identities.csv         # Same as identities.csv, without the days_since_last_update column
 │   ├── vessel_summary.csv            # One row per vessel: current verified identity + identity/flag counts
 │   ├── flag_change_intervals.csv     # Flag before/after each change, with IMO
-│   └── flag_df.csv                   # Flag before/after pairs, aggregated across the fleet
+│   ├── flag_df.csv                   # Flag before/after pairs, aggregated across the fleet
+│   └── port-visits.csv               # 2025 GFW port-visit events for all 50 vessels (cache, created in 05)
 ├── notebooks/
 │   ├── 01_data_collection.ipynb      # Pulls vessel identity data from the GFW API, caches to CSV
 │   ├── 02_flag_analysis.ipynb        # Flag-change frequency analysis, timeline construction
 │   ├── 03_visualization.ipynb        # Flag changes before and after 2023
 │   ├── 04_management_countries.ipynb # Registered owner vs ISM manager country, world map
-│   ├── 05_cargo_value_estimate.ipynb # Cargo value by tanker class + port-visit check (case study: Tagor)
+│   ├── 05_cargo_value_estimate.ipynb # Cargo value: class-based assumption vs GFW port visits
 │   └── utils.py                      # GFW API requests (identities, vessel ids, port visits) + JSON parsing
 ├── reports/
 │   └── ism_map.png                   # World map: vessels managed per country (ISM manager)
@@ -67,8 +68,18 @@ shadow-fleet-analysis/
   **captured by the French Navy** in the Atlantic ([source](TODO: link to news article)).
 
 ## Cargo value estimate (notebook 05)
-Estimated value of oil the 50 sampled tankers can carry per year:
-**≈ $6.6 – 20.0 bn** (Urals 2025 average: $66.5/bbl).
+Estimated value of oil loaded in Russian ports by the 50 sampled tankers in 2025:
+**≈ $4.0 – 7.5 bn** based on GFW port visits (Urals 2025 average: $66.5/bbl).
+
+The first, assumption-based estimate was **$6.6 – 20.0 bn**. Real port-visit data
+shows the assumed voyage counts **overstated the upper bound almost 3×**.
+
+| Approach | Low | High |
+|---|---|---|
+| Class-based assumption (voyages / year guessed) | $6.6 bn | $20.0 bn |
+| **GFW port visits (observed loadings)** | **$4.0 bn** | **$7.5 bn** |
+
+### 1. Class-based assumption
 
 | Tanker class | Vessels | DWT range (t) | Voyages / year (assumed) | Value / year |
 |---|---|---|---|---|
@@ -81,32 +92,42 @@ DWT range by tanker class × voyages per year range × 0.95 load factor × 7.33 
 Results are given as a low–high range (scenario analysis) instead of a single number,
 because vessel size and voyage frequency are uncertain.
 
-### Reality check: port visits (case study — Tagor)
-To test the voyages/year assumption, GFW port-visit events for 2025 were pulled for Tagor.
-A **loading** is counted as a visit to a Russian port lasting 12–120 hours;
-consecutive visits to the same port are merged into one loading.
-The GFW `atDock` flag was **not** used: it is `False` for all Russian terminal visits,
-so it cannot identify loadings.
+### 2. GFW port visits (observed loadings)
+Port-visit events for 2025 were pulled from GFW for **every AIS identity** linked to each IMO
+(1,755 visits in total). Loadings were detected with simple rules:
+- port country = Russia
+- stay of 12–120 hours (loading time; shorter = transit, longer = waiting / STS / repair)
+- repeated consecutive visits to the same port = one loading
+- **Handysize: loadings ÷ 2** — these are mostly river-sea tankers shuttling between
+  two Russian ports (e.g. St Petersburg ↔ Ust-Luga), so each round trip shows up as 2 visits
 
-| | Loadings | Cargo value |
+The GFW `atDock` flag was **not** used: it is `False` for Russian oil terminal visits
+where the vessel must have loaded, so it cannot identify loadings.
+
+| Tanker class | Loadings (2025) | Value |
 |---|---|---|
-| Assumption (class-based) | 5–8 / year | $185–408M |
-| GFW port visits (1 of 8 AIS ids) | 3 in ~7 months (Primorsk, Ust-Luga, Kozmino) | **$111–153M** |
+| Handysize | 111.5 | $0.36 – 2.07 bn |
+| Aframax | 63 | $2.33 – 3.21 bn |
+| Suezmax | 24 | $1.33 – 2.22 bn |
+| **Total** | **198.5** | **$4.03 – 7.50 bn** |
 
-The assumption is plausible but on the high side. The port-visit figure is a **lower bound**:
-AIS data ends on 27 Jul 2025, only one of Tagor's 8 GFW identities was used,
-and a 20-day stay at Ust-Luga (possible STS transfer) was not counted.
+**Case study — Tagor:** 3 loadings in 2025 (Primorsk, Ust-Luga, Kozmino) → $111–153M,
+vs $185–408M under the class-based assumption. A 20-day stay at Ust-Luga
+(possible STS transfer) is not counted as a loading.
 
 **Assumptions & limitations:**
-- DWT and voyages are class-based ranges, not per-vessel data
-- Voyages per year are rough assumptions; the port-visit check covers only one vessel so far
+- DWT is a class-based range, not per-vessel data
+- Loading detection is a heuristic (stay length), not confirmed cargo data
+- Port-visit counts are a **lower bound**: vessels can switch AIS off ("go dark"),
+  and STS transfers at sea are not counted. 3 vessels show no Russian loadings at all
+- Handysize ÷ 2 rule is a simplification; not every Handysize is a shuttle
 - All cargo is treated as crude oil (7.33 bbl/t), although some vessels carry refined products
 - A single annual average price is used; monthly price variation is ignored
 - This is the **value of the cargo**, not the vessel operators' profit and not the amount
   that violates sanctions — only sales above the price cap are a violation
 
 ## Next steps
-- [ ] Pull port visits for **all** GFW identities of a vessel (fix `get_port_visitors` for multiple ids), then scale the loading count to all 50 tankers
+- [ ] Check vessels with 0 or very few loadings for AIS gaps (possible "going dark")
 - [ ] Use per-vessel DWT from OpenSanctions instead of class-based ranges
 - [ ] Use monthly Urals prices and the price-cap timeline to estimate the above-cap share
 - [ ] Pull vessel-encounter (ship-to-ship transfer) events from GFW to add a behavioral layer
